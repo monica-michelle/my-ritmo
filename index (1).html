@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ritmo — Personal timing intelligence</title>
+<meta name="description" content="There are windows in life when effort compounds, and windows when it doesn't. Ritmo helps you recognize the difference.">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0A1424">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Schibsted+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A1424'/%3E%3Cpath d='M48.9 26.8 A18 18 0 1 1 38.2 16.1' fill='none' stroke='%23F5F7FA' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='44.7' cy='20.3' r='4.5' fill='%23CFA64E'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0A1424; --panel:#101D33; --ink:#F5F7FA; --muted:#93A0B4; --dim:#5C6B82;
+    --gold:#CFA64E; --gold-soft:rgba(207,166,78,.14); --line:rgba(245,247,250,.12);
+    --gold-line:rgba(207,166,78,.5);
+    --serif:'EB Garamond',Georgia,serif; --sans:'Schibsted Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--gold);color:#0A1424}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+  .mono{font-family:var(--mono)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:lowercase;color:var(--gold)}
+
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,20,36,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+  .wordmark{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;letter-spacing:.24em}
+  .wordmark svg{width:26px;height:26px;flex:none}
+  .wordmark span{color:var(--gold)}
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:13px;color:var(--muted)}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{display:inline-block;font-size:13px;font-weight:500;border-radius:8px;padding:11px 20px;border:1px solid var(--gold);color:var(--ink);transition:background .25s,color .25s;cursor:pointer;background:transparent}
+  .btn:hover{background:var(--gold-soft)}
+  .btn.solid{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .btn.solid:hover{background:#D8B25F}
+
+  header{padding:96px 0 56px;position:relative;overflow:hidden}
+  .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:48px;align-items:center}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,62px);line-height:1.08;margin:20px 0 22px}
+  .sub{color:var(--muted);font-size:17px;max-width:46ch;margin-bottom:34px}
+  .mark{display:flex;justify-content:center}
+  .mark svg{width:min(280px,60vw);height:auto;opacity:0;animation:fadeUp 1.1s .25s ease forwards}
+  .mark .dot{transform-origin:center;animation:breathe 6s 1.4s ease-in-out infinite}
+  @keyframes fadeUp{to{opacity:1}}
+  @keyframes breathe{0%,100%{opacity:1}50%{opacity:.45}}
+
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;max-width:430px}
+  .note{font-size:12px;color:var(--dim);margin-top:12px}
+  .capture{display:flex;gap:10px;max-width:430px}
+  .capture input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:14px;padding:12px 14px;outline:none}
+  .capture input:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+  .capture input::placeholder{color:var(--dim)}
+  .msg{font-size:13px;margin-top:12px;min-height:20px}
+  .msg.ok{color:var(--gold)} .msg.err{color:#C77B6B}
+
+  .strip{padding:26px 0 70px}
+  .timeline{position:relative;height:84px}
+  .axis{position:absolute;top:42px;left:0;right:0;height:1px;background:var(--line)}
+  .now{position:absolute;top:35px;left:18%;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);background:var(--bg)}
+  .now-label{position:absolute;top:58px;left:16.5%;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .win{position:absolute;top:27px;height:31px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;opacity:0;animation:fadeUp .9s ease forwards;padding:0 8px;text-align:center}
+  .win.strong{left:34%;width:25%;border:1px solid var(--gold);background:var(--gold-soft);color:var(--gold);animation-delay:.5s}
+  .win.faint{left:68%;width:18%;border:1px solid rgba(207,166,78,.4);color:rgba(207,166,78,.65);animation-delay:.8s}
+  .month{position:absolute;top:58px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .peak{position:absolute;top:38px;left:55.2%;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+  .sep{width:6px;height:6px;border-radius:50%;background:var(--gold);margin:30px auto 0}
+
+  section{padding:78px 0;border-top:1px solid var(--line)}
+  section.light{--bg:#FFFFFF;--panel:#F2F5F9;--ink:#0A1424;--muted:#46566E;--dim:#7C8AA0;
+    --gold:#A57A28;--gold-soft:rgba(165,122,40,.12);--gold-line:rgba(165,122,40,.45);--line:rgba(10,20,36,.12);
+    background:var(--bg);color:var(--ink);border-top:none}
+  h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,38px);line-height:1.2;margin:16px 0 14px}
+  .lede{color:var(--muted);max-width:58ch}
+
+  .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:44px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;transition:border-color .25s}
+  .card::before{content:"";display:block;width:28px;height:2px;background:var(--gold);margin-bottom:16px}
+  .card:hover{border-color:var(--gold-line)}
+  .card .k{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.2em}
+  .card h3{font-family:var(--serif);font-weight:400;font-size:19px;margin:12px 0 8px}
+  .card p{font-size:13.5px;color:var(--muted)}
+
+  .manifesto{max-width:620px;margin:0 auto;text-align:center}
+  .manifesto p{font-family:var(--serif);font-size:clamp(20px,3vw,26px);line-height:1.55;color:var(--ink)}
+  .manifesto p + p{margin-top:26px}
+  .manifesto .quiet{color:var(--muted)}
+
+  .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:44px;max-width:760px}
+  .tier{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px}
+  .tier.featured{border-color:var(--gold)}
+  .tier .name{font-family:var(--serif);font-size:21px}
+  .tier .price{font-family:var(--mono);font-size:15px;color:var(--gold);margin:8px 0 18px}
+  .tier ul{list-style:none}
+  .tier li{font-size:13.5px;color:var(--muted);padding:7px 0 7px 15px;border-top:1px solid var(--line);position:relative}
+  .tier li::before{content:"";position:absolute;left:0;top:15px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+  .tier li:first-child{border-top:none}
+  .tier li b{color:var(--ink);font-weight:500}
+  .tier .tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--gold);border:1px solid rgba(207,166,78,.45);border-radius:20px;padding:3px 10px;margin-bottom:14px}
+
+  .install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--gold-line);padding:14px 20px;z-index:50;align-items:center;justify-content:space-between;gap:12px}
+  .install-banner.show{display:flex}
+  .install-banner span{font-size:13px;color:var(--ink)}
+  .install-banner button{flex-shrink:0}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 44px}
+  .foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--dim)}
+
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.mark svg,.win{opacity:1}}
+  @media(max-width:760px){
+    .hero{grid-template-columns:1fr}
+    .mark{order:-1;max-width:200px;margin:0 auto}
+    .nav-links a.hide-m{display:none}
+    header{padding:48px 0 32px}
+    .hero-actions{flex-direction:column;max-width:100%}
+    .hero-actions .btn{text-align:center}
+    section{padding:56px 0}
+    .timeline{height:110px}
+    .win{font-size:10px}
+    .win.strong{left:8%;width:40%}
+    .win.faint{left:55%;width:38%}
+    .now{left:4%}
+    .now-label{left:1%}
+    .peak{left:50%}
+  }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-inner">
+  <a class="wordmark" href="#top"><svg viewBox="0 0 44 46" aria-hidden="true"><path d="M37 18.5 A16 16 0 1 1 27.5 9" fill="none" stroke="#F5F7FA" stroke-width="2.6" stroke-linecap="round"/><circle cx="33.3" cy="12.7" r="3.6" fill="#CFA64E"/></svg>ritmo<span>·</span></a>
+  <div class="nav-links">
+    <a class="hide-m" href="#system">The system</a>
+    <a class="hide-m" href="#philosophy">Philosophy</a>
+    <a class="hide-m" href="#access">Access</a>
+    <a class="btn solid" href="/app.html">Open app</a>
+  </div>
+</div></nav>
+
+<header id="top"><div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">personal timing intelligence</div>
+      <h1>Timing is leverage.</h1>
+      <p class="sub">The same decision, made in the right window, produces disproportionate results. Ritmo shows you when your windows open — and when the smartest move is to wait.</p>
+      <div class="hero-actions">
+        <a href="/app.html" class="btn solid">Begin your 30-day trial</a>
+        <a href="#access" class="btn">View pricing</a>
+      </div>
+      <p class="note">30-day trial · $29/month after · Cancel anytime · No horoscopes.</p>
+
+      <form class="capture" id="waitlist" novalidate style="margin-top:28px">
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required aria-label="Email address">
+        <button class="btn solid" type="submit">Join the list</button>
+      </form>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+        <path d="M260.2 252.4 A132 132 0 1 1 205.1 96" fill="none" stroke="#F5F7FA" stroke-width="5" stroke-linecap="round"/>
+        <line x1="160" y1="274" x2="160" y2="292" stroke="#F5F7FA" stroke-width="3" stroke-linecap="round"/>
+        <line x1="46" y1="160" x2="28" y2="160" stroke="#F5F7FA" stroke-width="3" stroke-linecap="round"/>
+        <circle class="dot" cx="253" cy="67" r="13" fill="#C9A14A"/>
+      </svg>
+    </div>
+  </div>
+</div></header>
+
+<div class="strip"><div class="wrap">
+  <div class="timeline" aria-label="Example timing horizon">
+    <div class="axis"></div>
+    <div class="now"></div><div class="now-label">today</div>
+    <div class="win strong">Capital · opens in 4 days</div>
+    <div class="peak" title="peak day"></div>
+    <div class="win faint">Visibility · next month</div>
+    <div class="month" style="left:0">this month</div>
+    <div class="month" style="left:48%">next month</div>
+    <div class="month" style="right:0">after</div>
+  </div>
+</div></div>
+
+<section id="system" class="light"><div class="wrap">
+  <div class="eyebrow">the system</div>
+  <h2>Four instruments. One question: is this the moment?</h2>
+  <p class="lede">Ritmo computes your personal timing signature once, then watches conditions continuously. You see windows, signals, and counsel — never charts, never jargon.</p>
+  <div class="pillars">
+    <div class="card"><div class="k">HORIZON</div><h3>When to act</h3><p>Your next 90 days as terrain. Windows for capital, launches, negotiation, creation, and rest appear as corridors of light — with opening, peak, and close dates.</p></div>
+    <div class="card"><div class="k">STANCE</div><h3>One word, daily</h3><p>Every day is exactly one of five: Advance, Hold, Close, Prepare, Reset. Learn the vocabulary in a week. Glance at it for the rest of your life.</p></div>
+    <div class="card"><div class="k">BRIEFING</div><h3>What it means</h3><p>A Sunday memo with a position — what this week is for, what it is not for, and the dates to protect. Written like counsel, not a horoscope.</p></div>
+    <div class="card"><div class="k">DESK</div><h3>Decide with counsel</h3><p>Ask a real question — "sign now or push to next month?" — and get an answer grounded in your timing data, with alternative dates when you can't follow it.</p></div>
+  </div>
+</div></section>
+
+<section id="philosophy"><div class="wrap manifesto">
+  <div class="eyebrow">philosophy</div>
+  <p style="margin-top:18px">There are windows in life when effort compounds.</p>
+  <p class="quiet">There are windows when it doesn't.</p>
+  <p>Most people manage time.<br>Exceptional people understand timing.</p>
+  <div class="sep" aria-hidden="true"></div>
+</div></section>
+
+<section id="access" class="light"><div class="wrap">
+  <div class="eyebrow">access</div>
+  <h2>Membership</h2>
+  <p class="lede">Full access from day one. 30-day trial included.</p>
+  <div class="tiers">
+    <div class="tier featured">
+      <div class="tag">full access</div>
+      <div class="name">Ritmo</div>
+      <div class="price">$29 / month</div>
+      <ul>
+        <li><b>Daily stance</b> — one word, every morning</li>
+        <li><b>Horizon</b> — your 90-day window map</li>
+        <li><b>The Sunday briefing</b></li>
+        <li><b>Calendar sync</b> — windows on your calendar</li>
+        <li><b>Desk</b> — strategic consults</li>
+        <li><b>Atlas</b> — geographic positioning & travel</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note" style="margin-top:22px"><a href="/app.html" class="btn solid">Begin your 30-day trial</a></p>
+</div></section>
+
+<footer><div class="wrap foot">
+  <span style="display:flex;align-items:center;gap:9px"><svg viewBox="0 0 44 46" style="width:20px;height:20px" aria-hidden="true"><path d="M37 18.5 A16 16 0 1 1 27.5 9" fill="none" stroke="#F5F7FA" stroke-width="2.6" stroke-linecap="round"/><circle cx="33.3" cy="12.7" r="3.6" fill="#CFA64E"/></svg>ritmo · calibrated to one person: you</span>
+  <span class="mono">© 2026 Ritmo</span>
+</div></footer>
+
+<div class="install-banner" id="installBanner">
+  <span>Install Ritmo for one-tap access from your home screen.</span>
+  <button class="btn solid" id="installBtn">Install</button>
+  <button class="btn" id="dismissBtn">Not now</button>
+</div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('ritmo_install_dismissed')) {
+      document.getElementById('installBanner').classList.add('show');
+    }
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    document.getElementById('installBanner').classList.remove('show');
+    if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; }
+  });
+  document.getElementById('dismissBtn').addEventListener('click', () => {
+    document.getElementById('installBanner').classList.remove('show');
+    localStorage.setItem('ritmo_install_dismissed','1');
+  });
+
+  // ── Waitlist signup ──────────────────────────────────────────────
+  const SUPABASE_URL = "https://kmodrfgrydjoujdrmfzo.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_28i4s2cpJXiBM7UWpTasPQ_SpOQLLN8";
+
+  const form = document.getElementById('waitlist');
+  const msg = document.getElementById('msg');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { show('Enter a valid email to join.', false); return; }
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, Prefer: 'return=minimal' },
+        body: JSON.stringify({ email })
+      });
+      if (r.ok || r.status === 409) { show("You're on the list. Watch your inbox.", true); form.reset(); }
+      else { const t = await r.text(); show(t.includes('duplicate') ? "You're already on the list." : 'Something went wrong — try again.', t.includes('duplicate')); }
+    } catch { show('Network issue — try again in a moment.', false); }
+  });
+  function show(text, ok) { msg.textContent = text; msg.className = 'msg ' + (ok ? 'ok' : 'err'); }
+</script>
+</body>
+</html>

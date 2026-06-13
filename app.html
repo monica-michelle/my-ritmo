@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ritmo — Your timing</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0A1424">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Schibsted+Grotesk:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A1424'/%3E%3Cpath d='M48.9 26.8 A18 18 0 1 1 38.2 16.1' fill='none' stroke='%23F5F7FA' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='44.7' cy='20.3' r='4.5' fill='%23CFA64E'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0A1424; --panel:#101D33; --panel2:#0D1A2E; --ink:#F5F7FA; --muted:#93A0B4; --dim:#5C6B82;
+  --gold:#CFA64E; --gold-soft:rgba(207,166,78,.14); --line:rgba(245,247,250,.12);
+  --gold-line:rgba(207,166,78,.5);
+  --sage:#7CA88B; --sage-soft:rgba(124,168,139,.14);
+  --rose:#C98B7B; --rose-soft:rgba(201,139,123,.14);
+  --serif:'EB Garamond',Georgia,serif; --sans:'Schibsted Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono)}
+
+/* SHELL */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:210px;flex-shrink:0;background:var(--panel2);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar-logo{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:18px;letter-spacing:.2em;padding:1.5rem 1.25rem;border-bottom:1px solid var(--line)}
+.sidebar-logo svg{width:22px;height:22px;flex:none}
+.sidebar-logo span{color:var(--gold)}
+.sidebar-nav{padding:1rem 0.6rem;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:0.65rem 0.85rem;font-size:13px;color:var(--muted);cursor:pointer;border:none;background:none;width:100%;text-align:left;border-radius:6px;transition:all .15s;margin-bottom:2px}
+.ni:hover{color:var(--ink);background:rgba(245,247,250,.04)}
+.ni.active{color:var(--ink);background:var(--gold-soft)}
+.ni-k{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--gold);width:18px;flex-shrink:0}
+.sidebar-bottom{padding:1rem 1.25rem;border-top:1px solid var(--line)}
+.trial-pill{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--gold);border:1px solid var(--gold-line);border-radius:20px;padding:3px 10px;display:inline-block;margin-bottom:6px}
+.sidebar-sub{font-size:11px;color:var(--dim)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto}
+.topbar{background:var(--panel2);border-bottom:1px solid var(--line);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30}
+.topbar-title{font-family:var(--serif);font-size:18px;color:var(--ink)}
+.topbar-sub{font-size:11px;color:var(--dim);margin-top:2px;font-family:var(--mono);letter-spacing:.06em}
+.topbar-right{text-align:right}
+.topbar-stance{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-line);border-radius:20px;padding:4px 12px}
+
+.content{padding:2rem;max-width:980px}
+.screen{display:none}.screen.active{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:lowercase;color:var(--gold);margin-bottom:.75rem}
+.page-title{font-family:var(--serif);font-size:30px;font-weight:400;color:var(--ink);margin-bottom:.4rem;line-height:1.15}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:2rem;max-width:60ch}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1.5rem;margin-bottom:1rem}
+.card-title{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1.1rem;display:flex;justify-content:space-between;align-items:center}
+
+/* FORMS */
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+input,select{width:100%;padding:.7rem .9rem;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-full{grid-column:1/-1}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:.7rem 1.6rem;font-family:var(--sans);font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid var(--gold)}
+.btn-primary{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.btn-primary:hover{background:#D8B25F}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn-ghost:hover{color:var(--ink);border-color:var(--gold-line)}
+
+/* ONBOARD */
+.ob-steps{display:flex;gap:6px;margin-bottom:2rem}
+.ob-step{flex:1;height:2px;background:var(--line);border-radius:2px}
+.ob-step.done,.ob-step.active{background:var(--gold)}
+.ob-step.active{opacity:.5}
+
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-item{display:flex;align-items:center;gap:8px;padding:.65rem .9rem;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:12px;color:var(--muted);background:var(--panel2);transition:all .15s}
+.check-item.selected{border-color:var(--gold);color:var(--ink);background:var(--gold-soft)}
+.check-box{width:13px;height:13px;border:1px solid currentColor;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px}
+
+/* PROFILE */
+.profile-header{padding:1.5rem;border:1px solid var(--line);border-radius:12px;display:flex;justify-content:space-between;align-items:flex-start;background:var(--panel);margin-bottom:1rem;flex-wrap:wrap;gap:1rem}
+.profile-title{font-family:var(--serif);font-size:21px;color:var(--ink)}
+.profile-title em{font-style:italic;color:var(--gold)}
+.profile-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.profile-badge{text-align:right}
+.profile-badge-label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.profile-badge-val{font-family:var(--serif);font-size:19px;color:var(--gold);margin-top:2px}
+
+.planet-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;border-bottom:1px solid var(--line)}
+.planet-row:last-child{border-bottom:none}
+.planet-l{display:flex;align-items:center;gap:8px}
+.planet-pip{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--gold)}
+.planet-name{font-size:12px;color:var(--muted)}
+.planet-r{text-align:right}
+.planet-pos{font-family:var(--serif);font-size:15px;color:var(--ink)}
+.planet-sig{font-size:11px;color:var(--dim);margin-top:1px;max-width:280px}
+
+/* LOADING */
+.loading{padding:3.5rem;text-align:center}
+.loading-ring{width:34px;height:34px;border:1.5px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.25rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--muted)}
+.loading-sub{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:.5rem;letter-spacing:.06em}
+
+/* STANCE STRIP */
+.stance-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+.stance-day{background:var(--panel);padding:1rem .6rem;text-align:center}
+.stance-day.today{background:var(--gold-soft)}
+.stance-day-name{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);margin-bottom:6px}
+.stance-day-date{font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:8px}
+.stance-word{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 0;border-radius:4px}
+.sw-advance{color:var(--gold)}
+.sw-hold{color:var(--muted)}
+.sw-close{color:var(--sage)}
+.sw-prepare{color:#8E9FE0}
+.sw-reset{color:var(--rose)}
+
+/* BRIEFING */
+.brief-block{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:1.5rem;margin-bottom:1.5rem}
+.brief-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.brief-text{font-family:var(--serif);font-size:19px;font-style:italic;line-height:1.65;color:var(--ink)}
+
+.domain-block{border-left:1px solid var(--line);padding-left:1.25rem;margin-bottom:1.5rem}
+.domain-block.gold-l{border-left-color:var(--gold)}
+.domain-block.sage-l{border-left-color:var(--sage)}
+.domain-block.rose-l{border-left-color:var(--rose)}
+.domain-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.domain-block.gold-l .domain-label{color:var(--gold)}
+.domain-block.sage-l .domain-label{color:var(--sage)}
+.domain-block.rose-l .domain-label{color:var(--rose)}
+.domain-text{font-family:var(--serif);font-size:16px;font-weight:400;line-height:1.75;color:#D7DEEA}
+
+/* HORIZON */
+.horizon-track{position:relative;height:120px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.horizon-axis{position:absolute;top:60px;left:24px;right:24px;height:1px;background:var(--line)}
+.horizon-now{position:absolute;top:53px;left:24px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);background:var(--bg)}
+.horizon-now-label{position:absolute;top:78px;left:18px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.horizon-win{position:absolute;top:42px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;text-align:center;padding:0 10px}
+.hw-gold{border:1px solid var(--gold);background:var(--gold-soft);color:var(--gold)}
+.hw-sage{border:1px solid rgba(124,168,139,.5);background:var(--sage-soft);color:var(--sage)}
+.hw-rose{border:1px solid rgba(201,139,123,.4);background:var(--rose-soft);color:var(--rose)}
+.horizon-month{position:absolute;top:78px;font-family:var(--mono);font-size:10px;color:var(--dim)}
+
+.horizon-legend{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.5rem;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.hl-item{display:flex;align-items:center;gap:6px}
+.hl-dot{width:8px;height:8px;border-radius:50%}
+
+/* CALENDAR / SUGGESTIONS */
+.sug-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.75rem;display:flex;gap:1rem;align-items:flex-start}
+.sug-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--panel2);border-radius:8px;font-family:var(--mono);color:var(--gold)}
+.sug-when{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--gold);margin-bottom:3px}
+.sug-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.sug-why{font-size:12.5px;color:var(--muted);line-height:1.6}
+.sug-btns{display:flex;gap:6px;margin-top:.75rem}
+.bxs{padding:.32rem .85rem;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .15s}
+.bxs-add{border-color:var(--gold);color:var(--gold)}
+.bxs-add:hover{background:var(--gold-soft)}
+.bxs-add.done{border-color:var(--sage);color:var(--sage);cursor:default}
+.bxs-skip:hover{color:var(--ink)}
+
+/* DESK */
+.desk-chat{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+.desk-messages{padding:1.5rem;min-height:200px;display:flex;flex-direction:column;gap:1rem}
+.desk-msg{max-width:80%;padding:.85rem 1.1rem;border-radius:10px;font-size:13.5px;line-height:1.6}
+.desk-msg.user{align-self:flex-end;background:var(--gold-soft);color:var(--ink);border:1px solid var(--gold-line)}
+.desk-msg.ritmo{align-self:flex-start;background:var(--panel2);color:#D7DEEA;border:1px solid var(--line);font-family:var(--serif);font-size:15px;font-style:italic}
+.desk-input-row{display:flex;gap:.6rem;padding:1rem 1.25rem;border-top:1px solid var(--line)}
+.desk-input-row input{flex:1}
+.desk-examples{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.desk-example{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .15s}
+.desk-example:hover{border-color:var(--gold-line);color:var(--gold)}
+
+/* ATLAS */
+.map-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.map-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.map-header-title{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.map-header-sub{font-size:11px;color:var(--dim)}
+.map-area{height:220px;background:var(--panel2);position:relative}
+.transit-alert{margin:1rem 1.5rem;padding:1rem 1.25rem;background:var(--gold-soft);border-left:2px solid var(--gold);border-radius:0 8px 8px 0;font-size:12.5px;color:#D7DEEA;line-height:1.65}
+.transit-alert strong{color:var(--gold)}
+.dest-list{padding:0 1.5rem 1.5rem}
+.dest-card{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line)}
+.dest-card:last-child{border-bottom:none}
+.dest-score{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;flex-shrink:0;border-radius:8px}
+.dest-score.high{background:var(--sage-soft);color:var(--sage)}
+.dest-score.mid{background:var(--gold-soft);color:var(--gold)}
+.dest-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.dest-why{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:6px}
+.dest-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+.dest-pill{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:2px 8px;border:1px solid var(--line);border-radius:20px;color:var(--muted)}
+.dest-links{display:flex;gap:6px}
+.dest-link{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--muted);cursor:pointer;transition:all .15s}
+.dest-link:hover{border-color:var(--gold-line);color:var(--gold)}
+
+/* ACCOUNT */
+.account-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--line);font-size:13px}
+.account-row:last-child{border-bottom:none}
+.account-row-label{color:var(--muted)}
+.account-row-val{color:var(--ink);font-weight:500}
+.trial-card{background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:12px;padding:1.4rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.trial-card-title{font-size:14px;font-weight:500;color:var(--gold)}
+.trial-card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.connected-badge{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;background:var(--sage-soft);color:var(--sage);border-radius:20px}
+
+/* MOBILE NAV */
+.mobile-topbar{display:none}
+.mobile-nav{display:none}
+
+@media(max-width:880px){
+  .sidebar{display:none}
+  .mobile-topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--panel2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+  .mobile-topbar .wordmark{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:16px;letter-spacing:.2em}
+  .mobile-topbar .wordmark svg{width:20px;height:20px}
+  .mobile-topbar .wordmark span{color:var(--gold)}
+  .mobile-topbar .trial-pill{margin:0}
+  .content{padding:1.25rem;padding-bottom:5.5rem;max-width:100%}
+  .topbar{display:none}
+  .page-title{font-size:24px}
+  .form-grid,.check-grid,.stance-strip{grid-template-columns:repeat(2,1fr)}
+  .stance-strip{grid-template-columns:repeat(4,1fr);gap:6px;background:transparent;border:none}
+  .stance-day{border-radius:8px;border:1px solid var(--line)}
+  .horizon-win{font-size:9px;padding:0 4px}
+  .horizon-win.hw-rose{display:none}
+  .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--panel2);border-top:1px solid var(--line);z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+  .mn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:.6rem 0;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--dim);background:none;border:none;text-transform:uppercase}
+  .mn-item.active{color:var(--gold)}
+  .mn-icon{font-size:16px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- DESKTOP SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><svg viewBox="0 0 44 46" aria-hidden="true"><path d="M37 18.5 A16 16 0 1 1 27.5 9" fill="none" stroke="#F5F7FA" stroke-width="2.6" stroke-linecap="round"/><circle cx="33.3" cy="12.7" r="3.6" fill="#CFA64E"/></svg>ritmo<span>·</span></div>
+    <nav class="sidebar-nav">
+      <button class="ni active" data-s="onboard" onclick="show('onboard')"><span class="ni-k">00</span>Profile</button>
+      <button class="ni" data-s="briefing" onclick="show('briefing')"><span class="ni-k">01</span>Briefing</button>
+      <button class="ni" data-s="horizon" onclick="show('horizon')"><span class="ni-k">02</span>Horizon</button>
+      <button class="ni" data-s="calendar" onclick="show('calendar')"><span class="ni-k">03</span>Calendar</button>
+      <button class="ni" data-s="desk" onclick="show('desk')"><span class="ni-k">04</span>Desk</button>
+      <button class="ni" data-s="atlas" onclick="show('atlas')"><span class="ni-k">05</span>Atlas</button>
+      <button class="ni" data-s="account" onclick="show('account')"><span class="ni-k">06</span>Account</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="trial-pill">trial · day 3/30</div>
+      <div class="sidebar-sub">Calibrated to Monica</div>
+    </div>
+  </div>
+
+  <!-- MOBILE TOPBAR -->
+  <div class="mobile-topbar">
+    <div class="wordmark"><svg viewBox="0 0 44 46" aria-hidden="true"><path d="M37 18.5 A16 16 0 1 1 27.5 9" fill="none" stroke="#F5F7FA" stroke-width="2.6" stroke-linecap="round"/><circle cx="33.3" cy="12.7" r="3.6" fill="#CFA64E"/></svg>ritmo<span>·</span></div>
+    <div class="trial-pill">day 3/30</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="tt">Timing profile</div>
+        <div class="topbar-sub" id="ts">calibrated foundation</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-stance" id="topStance">Today: Advance</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ONBOARD -->
+      <div id="onboard" class="screen active">
+        <div class="ob-steps" id="obSteps">
+          <div class="ob-step active"></div><div class="ob-step"></div><div class="ob-step"></div>
+        </div>
+
+        <div id="ob1">
+          <div class="eyebrow">calibration · step 1 of 3</div>
+          <div class="page-title">Your timing signature</div>
+          <div class="page-sub">One input, calculated once. The foundation of every briefing, stance, and window Ritmo ever shows you.</div>
+          <div class="card">
+            <div class="form-grid">
+              <div><label>Date of birth</label><input type="date" id="bDate" value="1985-03-21"></div>
+              <div><label>Exact birth time</label><input type="time" id="bTime" value="14:32">
+                <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px">precision improves accuracy</div>
+              </div>
+              <div class="form-full"><label>Place of birth</label><input type="text" id="bPlace" value="San Francisco, California"></div>
+              <div class="form-full"><label>Your name</label><input type="text" id="bName" value="Monica"></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="obGo(2)">Continue →</button>
+        </div>
+
+        <div id="ob2" style="display:none">
+          <div class="eyebrow">calibration · step 2 of 3</div>
+          <div class="page-title">Priority domains</div>
+          <div class="page-sub">Ritmo weights your briefing toward what matters most in your current chapter.</div>
+          <div class="card">
+            <label style="margin-bottom:.75rem">Active domains</label>
+            <div class="check-grid">
+              <div class="check-item selected" onclick="tc(this)"><div class="check-box">✓</div>Capital & investment</div>
+              <div class="check-item selected" onclick="tc(this)"><div class="check-box">✓</div>Business development</div>
+              <div class="check-item selected" onclick="tc(this)"><div class="check-box">✓</div>Creative & strategic work</div>
+              <div class="check-item" onclick="tc(this)"><div class="check-box"></div>Leadership & team</div>
+              <div class="check-item" onclick="tc(this)"><div class="check-box"></div>Relationships</div>
+              <div class="check-item" onclick="tc(this)"><div class="check-box"></div>Recovery & performance</div>
+              <div class="check-item" onclick="tc(this)"><div class="check-box"></div>Travel & positioning</div>
+              <div class="check-item" onclick="tc(this)"><div class="check-box"></div>Public visibility</div>
+            </div>
+            <div style="margin-top:1.25rem">
+              <label>Your most consequential open decision</label>
+              <input type="text" value="Is this the right moment to make a bold move in my work?">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="obGo(1)">← Back</button>
+            <button class="btn btn-primary" onclick="obGo(3)">Continue →</button>
+          </div>
+        </div>
+
+        <div id="ob3" style="display:none">
+          <div class="eyebrow">calibration · step 3 of 3</div>
+          <div class="page-title">Signature calibrated</div>
+          <div class="page-sub">Your permanent timing data has been calculated.</div>
+          <div class="profile-header">
+            <div>
+              <div class="profile-title"><em>Monica</em> — Timing Signature</div>
+              <div class="profile-sub">Aries Sun · Scorpio Rising · Capricorn Moon</div>
+              <div class="profile-sub">Mercury in Pisces · Venus in Taurus</div>
+            </div>
+            <div class="profile-badge">
+              <div class="profile-badge-label">active cycle</div>
+              <div class="profile-badge-val">7th House</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">positional data</div>
+            <div class="planet-row"><div class="planet-l"><div class="planet-pip"></div><div class="planet-name">Sun</div></div><div class="planet-r"><div class="planet-pos">0°24' Aries · H5</div><div class="planet-sig">Trine Jupiter — expanded creative authority</div></div></div>
+            <div class="planet-row"><div class="planet-l"><div class="planet-pip"></div><div class="planet-name">Moon</div></div><div class="planet-r"><div class="planet-pos">14°12' Capricorn · H3</div><div class="planet-sig">Square Venus — strategic tension</div></div></div>
+            <div class="planet-row"><div class="planet-l"><div class="planet-pip"></div><div class="planet-name">Mercury</div></div><div class="planet-r"><div class="planet-pos">22°06' Pisces · H4</div><div class="planet-sig">Sextile Pluto — penetrating analytical ability</div></div></div>
+            <div class="planet-row"><div class="planet-l"><div class="planet-pip"></div><div class="planet-name">Venus</div></div><div class="planet-r"><div class="planet-pos">8°18' Taurus · H6</div><div class="planet-sig">Conjunct North Node — high-value work orientation</div></div></div>
+            <div class="planet-row"><div class="planet-l"><div class="planet-pip"></div><div class="planet-name">Jupiter</div></div><div class="planet-r"><div class="planet-pos">17°30' Aquarius · H4</div><div class="planet-sig">Rising pattern — expansion as structural advantage</div></div></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="obGo(2)">← Back</button>
+            <button class="btn btn-primary" onclick="goBriefing()">Enter Ritmo →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRIEFING -->
+      <div id="briefing" class="screen">
+        <div id="bLoad" class="loading">
+          <div class="loading-ring"></div>
+          <div class="loading-title">Calibrating this week's briefing...</div>
+          <div class="loading-sub">cross-referencing active signals against your signature</div>
+        </div>
+        <div id="bContent" style="display:none">
+          <div class="eyebrow">the briefing · jun 9–15</div>
+          <div class="page-title">This week's stance: <em style="font-style:italic;color:var(--gold)">Advance</em></div>
+          <div class="page-sub">14 active signals · calibrated to your signature</div>
+
+          <div class="stance-strip" id="stanceStrip"></div>
+
+          <div class="brief-block">
+            <div class="brief-label">position</div>
+            <div class="brief-text">Your highest-leverage window of the past twelve months opens Tuesday and holds through Thursday. What you move on in that window — conversations, decisions, visible work — lands with unusual force. The weekend is for consolidation, not output.</div>
+          </div>
+
+          <div class="domain-block gold-l">
+            <div class="domain-label">capital & career</div>
+            <div class="domain-text">Tuesday carries the strongest decision-quality signal of the week. The positional data favors visibility and authority — conversations held now carry unusual weight. A negotiation or pitch initiated before noon Tuesday is operating with significant cycle support. Draft today. Move Tuesday morning.</div>
+          </div>
+          <div class="domain-block sage-l">
+            <div class="domain-label">creative & strategic work</div>
+            <div class="domain-text">Wednesday through Friday morning is your highest creative output window of the month. Protect it from reactive work. The analysis, writing, or strategic work you do in this window will be among your best of the quarter. This window does not extend into next week.</div>
+          </div>
+          <div class="domain-block rose-l">
+            <div class="domain-label">relationships & partnership</div>
+            <div class="domain-text">Your relationship sector is in an active resolution cycle. Something that has been unclear is approaching a point of definition. A direct, honest conversation Thursday evening will produce clarity that further delay will not.</div>
+          </div>
+          <div class="domain-block">
+            <div class="domain-label">decision timing</div>
+            <div class="domain-text">High-signal days: Tuesday (authority, visibility), Wednesday–Thursday (analytical peak). Consolidation: Saturday–Sunday. Caution window: Monday 2–6pm — do not initiate new contracts, launches, or negotiations.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HORIZON -->
+      <div id="horizon" class="screen">
+        <div class="eyebrow">horizon · 90-day window map</div>
+        <div class="page-title">When to act</div>
+        <div class="page-sub">Your terrain for the next quarter. Windows for capital, launches, negotiation, creation, and rest.</div>
+
+        <div class="horizon-legend">
+          <div class="hl-item"><div class="hl-dot" style="background:var(--gold)"></div>Capital / authority window</div>
+          <div class="hl-item"><div class="hl-dot" style="background:var(--sage)"></div>Creative / strategic window</div>
+          <div class="hl-item"><div class="hl-dot" style="background:var(--rose)"></div>Consolidation / caution</div>
+        </div>
+
+        <div class="horizon-track">
+          <div class="horizon-axis"></div>
+          <div class="horizon-now"></div>
+          <div class="horizon-now-label">today · jun 9</div>
+          <div class="horizon-win hw-gold" style="left:8%;width:26%">Capital window · opens Jun 10</div>
+          <div class="horizon-win hw-sage" style="left:38%;width:24%">Creative peak · Jun 11–13</div>
+          <div class="horizon-win hw-rose" style="left:66%;width:20%">Consolidation · Jun 14–20</div>
+          <div class="horizon-win hw-gold" style="left:88%;width:11%">Visibility · Jul 1</div>
+          <div class="horizon-month" style="left:1%">jun</div>
+          <div class="horizon-month" style="left:48%">jul</div>
+          <div class="horizon-month" style="right:1%">aug</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">window detail</div>
+          <div class="domain-block gold-l">
+            <div class="domain-label">capital window · opens jun 10</div>
+            <div class="domain-text">Jupiter stations direct on your Midheaven — the apex of a transit that began last October. Whatever you launched, pitched, or planted then is ready to be harvested. This window holds through June 22 with peak intensity June 10–13.</div>
+          </div>
+          <div class="domain-block sage-l">
+            <div class="domain-label">creative peak · jun 11–13</div>
+            <div class="domain-text">Your 5th house ruler in dialogue with natal Venus creates a rare window where creative and strategic output flows without resistance. This is not recoverable — it does not extend into the following week.</div>
+          </div>
+          <div class="domain-block rose-l" style="margin-bottom:0">
+            <div class="domain-label">consolidation · jun 14–20</div>
+            <div class="domain-text">Transiting Moon and supporting bodies move through your 12th house. Output forced here meets resistance disproportionate to the effort. Use this window for review, recovery, and preparation — not launches.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div id="calendar" class="screen">
+        <div class="eyebrow">calendar sync · jun 9–15</div>
+        <div class="page-title">Decision windows</div>
+        <div class="page-sub">Add directly to Google Calendar, Apple Calendar, or Outlook — one click, no interpretation required.</div>
+
+        <div class="sug-card" id="s1">
+          <div class="sug-icon">◆</div>
+          <div style="flex:1">
+            <div class="sug-when">tue jun 10 · 10:00–12:00</div>
+            <div class="sug-title">High-leverage conversation or negotiation</div>
+            <div class="sug-why">Cycle data strongly favors visibility and authority in this window. Decisions made here carry unusual forward momentum.</div>
+            <div class="sug-btns">
+              <button class="bxs bxs-add" onclick="ics(this,'s1','High-Leverage Conversation [Ritmo]','20260610','100000','120000')">+ add to calendar</button>
+              <button class="bxs bxs-skip" onclick="skip('s1')">skip</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sug-card" id="s2">
+          <div class="sug-icon">▦</div>
+          <div style="flex:1">
+            <div class="sug-when">wed–thu jun 11–12 · full days</div>
+            <div class="sug-title">Protected strategic work — block calendar</div>
+            <div class="sug-why">Peak analytical output window for this cycle. Highest-quality work generated here. Closes Friday morning and does not recur next week.</div>
+            <div class="sug-btns">
+              <button class="bxs bxs-add" onclick="ics(this,'s2','Protected Strategic Work [Ritmo]','20260611','090000','180000')">+ add to calendar</button>
+              <button class="bxs bxs-skip" onclick="skip('s2')">skip</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sug-card" id="s3">
+          <div class="sug-icon">◐</div>
+          <div style="flex:1">
+            <div class="sug-when">fri jun 13 · evening</div>
+            <div class="sug-title">Partnership resolution window</div>
+            <div class="sug-why">Relationship sector in active resolution cycle. A direct conversation this evening produces clarity that further delay will not.</div>
+            <div class="sug-btns">
+              <button class="bxs bxs-add" onclick="ics(this,'s3','Partnership Resolution Window [Ritmo]','20260613','180000','210000')">+ add to calendar</button>
+              <button class="bxs bxs-skip" onclick="skip('s3')">skip</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sug-card" id="s4">
+          <div class="sug-icon">—</div>
+          <div style="flex:1">
+            <div class="sug-when">sat–sun jun 14–15</div>
+            <div class="sug-title">Consolidation period — no new initiatives</div>
+            <div class="sug-why">Integration window. Recovery here is periodization, not inefficiency. Prepare for the following week's expansion window.</div>
+            <div class="sug-btns">
+              <button class="bxs bxs-add" onclick="ics(this,'s4','Consolidation Period [Ritmo]','20260614','000000','235900')">+ block time</button>
+              <button class="bxs bxs-skip" onclick="skip('s4')">skip</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sug-card" id="s5">
+          <div class="sug-icon">⊘</div>
+          <div style="flex:1">
+            <div class="sug-when">mon jun 9 · 14:00–18:00</div>
+            <div class="sug-title">Decision pause — caution window</div>
+            <div class="sug-why">New contracts, launches, or negotiations initiated here statistically underperform. Routine tasks only. Defer to Tuesday morning.</div>
+            <div class="sug-btns">
+              <button class="bxs bxs-add" onclick="ics(this,'s5','Decision Pause [Ritmo]','20260609','140000','180000')">+ add block</button>
+              <button class="bxs bxs-skip" onclick="skip('s5')">skip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESK -->
+      <div id="desk" class="screen">
+        <div class="eyebrow">the desk · counsel</div>
+        <div class="page-title">Ask Ritmo</div>
+        <div class="page-sub">A real question, answered with your timing data. When you can't follow the recommendation, you'll get alternative dates.</div>
+
+        <div class="desk-examples">
+          <div class="desk-example" onclick="deskAsk(this)">Sign now, or push to next month?</div>
+          <div class="desk-example" onclick="deskAsk(this)">Best week to launch this quarter?</div>
+          <div class="desk-example" onclick="deskAsk(this)">Should I take this meeting Friday?</div>
+        </div>
+
+        <div class="desk-chat">
+          <div class="desk-messages" id="deskMessages">
+            <div class="desk-msg ritmo">Ask a real question — a decision you're weighing, a date you're considering. I'll answer from your timing data, with alternatives if the date doesn't favor you.</div>
+          </div>
+          <div class="desk-input-row">
+            <input type="text" id="deskInput" placeholder="e.g. Should I sign this contract Monday?">
+            <button class="btn btn-primary" onclick="deskSend()">Ask</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATLAS -->
+      <div id="atlas" class="screen">
+        <div class="eyebrow">atlas · geographic positioning</div>
+        <div class="page-title">Where to go, and when</div>
+        <div class="page-sub">Location-based cycle activations for the current period.</div>
+
+        <div class="map-wrap">
+          <div class="map-header">
+            <div class="map-header-title">positioning map</div>
+            <div class="map-header-sub">natal lines + current activations</div>
+          </div>
+          <div class="map-area">
+            <svg width="100%" height="220" viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="820" height="220" fill="#0D1A2E"/>
+              <g opacity="0.18" stroke="#F5F7FA" stroke-width="0.5" fill="none">
+                <line x1="0" y1="55" x2="820" y2="55"/><line x1="0" y1="110" x2="820" y2="110"/><line x1="0" y1="165" x2="820" y2="165"/>
+                <line x1="115" y1="0" x2="115" y2="220"/><line x1="230" y1="0" x2="230" y2="220"/><line x1="345" y1="0" x2="345" y2="220"/><line x1="460" y1="0" x2="460" y2="220"/><line x1="575" y1="0" x2="575" y2="220"/><line x1="690" y1="0" x2="690" y2="220"/>
+              </g>
+              <path d="M 198 0 Q 200 55 198 110 Q 196 165 198 220" stroke="#7CA88B" stroke-width="2" fill="none" opacity="0.85"/>
+              <path d="M 112 0 Q 114 75 112 110 Q 110 155 112 220" stroke="#CFA64E" stroke-width="2" fill="none" opacity="0.85"/>
+              <path d="M 488 0 Q 490 55 488 110 Q 486 165 488 220" stroke="#5C6B82" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <path d="M 658 0 Q 660 55 658 110 Q 656 165 658 220" stroke="#8E9FE0" stroke-width="1.5" fill="none" opacity="0.6"/>
+              <circle cx="198" cy="75" r="5" fill="#7CA88B" opacity="0.4"/>
+              <circle cx="112" cy="92" r="4" fill="#CFA64E" opacity="0.4"/>
+              <text x="204" y="42" fill="#7CA88B" font-size="9" font-family="IBM Plex Mono,monospace" letter-spacing="2">EXPANSION</text>
+              <text x="118" y="58" fill="#CFA64E" font-size="9" font-family="IBM Plex Mono,monospace" letter-spacing="2">AUTHORITY</text>
+              <text x="494" y="55" fill="#93A0B4" font-size="9" font-family="IBM Plex Mono,monospace" letter-spacing="2">VISIBILITY</text>
+              <text x="664" y="72" fill="#8E9FE0" font-size="9" font-family="IBM Plex Mono,monospace" letter-spacing="2">ANALYTICAL</text>
+            </svg>
+          </div>
+          <div class="transit-alert"><strong>Active window — current period:</strong> Your primary expansion line through Western Europe is amplified by current cycle data. Portugal and the Azores represent your strongest geographic advantage through July. Recommended for: deal-making, visibility, strategic relationship development.</div>
+        </div>
+
+        <div class="map-wrap">
+          <div class="map-header"><div class="map-header-title">ranked destinations</div><div class="map-header-sub">current cycle score</div></div>
+          <div class="dest-list">
+            <div class="dest-card">
+              <div class="dest-score high">97</div>
+              <div>
+                <div class="dest-name">Lisbon, Portugal</div>
+                <div class="dest-why">Primary expansion line runs directly through Lisbon, amplified by current activation — among the strongest windows in a twelve-year cycle. Recommended for high-stakes meetings and partnership development.</div>
+                <div class="dest-pills"><span class="dest-pill">expansion asc</span><span class="dest-pill">authority mc</span></div>
+                <div class="dest-links"><div class="dest-link" onclick="ol('https://www.google.com/flights?q=flights+to+Lisbon')">✈ flights</div><div class="dest-link" onclick="ol('https://www.booking.com/search.html?ss=Lisbon')">⌂ hotels</div></div>
+              </div>
+            </div>
+            <div class="dest-card">
+              <div class="dest-score mid">84</div>
+              <div>
+                <div class="dest-name">Medellín, Colombia</div>
+                <div class="dest-why">Partnership positioning line through Colombia's interior. Active relationship sector cycle supports significant relational encounters and key introductions.</div>
+                <div class="dest-pills"><span class="dest-pill">expansion dsc</span><span class="dest-pill">visibility ic</span></div>
+                <div class="dest-links"><div class="dest-link" onclick="ol('https://www.google.com/flights?q=flights+to+Medellin')">✈ flights</div><div class="dest-link" onclick="ol('https://www.booking.com/search.html?ss=Medellin')">⌂ hotels</div></div>
+              </div>
+            </div>
+            <div class="dest-card">
+              <div class="dest-score mid">79</div>
+              <div>
+                <div class="dest-name">Kyoto, Japan</div>
+                <div class="dest-why">Analytical positioning line through central Japan. Recommended for deep strategic work and decisions requiring clarity over momentum.</div>
+                <div class="dest-pills"><span class="dest-pill">analytical mc</span></div>
+                <div class="dest-links"><div class="dest-link" onclick="ol('https://www.google.com/flights?q=flights+to+Kyoto')">✈ flights</div><div class="dest-link" onclick="ol('https://www.booking.com/search.html?ss=Kyoto')">⌂ hotels</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT -->
+      <div id="account" class="screen">
+        <div class="eyebrow">account</div>
+        <div class="page-title">Account & preferences</div>
+        <div class="page-sub">Manage your Ritmo membership and signature.</div>
+
+        <div class="trial-card">
+          <div>
+            <div class="trial-card-title">Trial active · Day 3 of 30</div>
+            <div class="trial-card-sub">Billing begins Jul 5, 2026 · $29/month</div>
+          </div>
+          <button class="btn btn-primary">Add payment method</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">timing signature</div>
+          <div class="account-row"><span class="account-row-label">Name</span><span class="account-row-val">Monica</span></div>
+          <div class="account-row"><span class="account-row-label">Birth date</span><span class="account-row-val">March 21, 1985</span></div>
+          <div class="account-row"><span class="account-row-label">Birth time</span><span class="account-row-val">2:32 PM</span></div>
+          <div class="account-row"><span class="account-row-label">Birth place</span><span class="account-row-val">San Francisco, CA</span></div>
+          <div class="account-row"><span class="account-row-label">Rising sign</span><span class="account-row-val">Scorpio</span></div>
+          <div class="account-row"><span class="account-row-label">Active cycle</span><span class="account-row-val">7th House</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">calendar connection</div>
+          <div class="account-row"><span class="account-row-label">Google Calendar</span><span class="connected-badge">connected</span></div>
+          <div class="account-row"><span class="account-row-label">Apple Calendar</span><button class="bxs bxs-skip">connect</button></div>
+          <div class="account-row"><span class="account-row-label">Briefing delivery</span><span class="account-row-val">Sunday 7:00 AM</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">priority domains</div>
+          <div class="account-row"><span class="account-row-label">Active domains</span><span class="account-row-val" style="font-size:11px;font-weight:400;text-align:right;max-width:260px">Capital & investment · Business development · Creative & strategic work</span></div>
+          <div class="account-row" style="border:none"><button class="bxs bxs-skip">edit domains</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-nav">
+    <button class="mn-item active" data-s="briefing" onclick="show('briefing')"><span class="mn-icon">◆</span>Brief</button>
+    <button class="mn-item" data-s="horizon" onclick="show('horizon')"><span class="mn-icon">⟿</span>Horizon</button>
+    <button class="mn-item" data-s="calendar" onclick="show('calendar')"><span class="mn-icon">▦</span>Calendar</button>
+    <button class="mn-item" data-s="desk" onclick="show('desk')"><span class="mn-icon">◐</span>Desk</button>
+    <button class="mn-item" data-s="atlas" onclick="show('atlas')"><span class="mn-icon">⊙</span>Atlas</button>
+  </div>
+
+</div>
+
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+
+const TITLES={
+  onboard:['Timing profile','calibrated foundation'],
+  briefing:['The briefing','jun 9–15 · 14 active signals'],
+  horizon:['Horizon','90-day window map'],
+  calendar:['Calendar sync','decision windows — jun 9–15'],
+  desk:['The desk','ask for counsel'],
+  atlas:['Atlas','geographic positioning'],
+  account:['Account','membership & signature']
+};
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni, .mn-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll(`[data-s="${id}"]`).forEach(el=>el.classList.add('active'));
+  document.getElementById('tt').textContent=TITLES[id][0];
+  document.getElementById('ts').textContent=TITLES[id][1];
+}
+
+function obGo(n){
+  document.querySelectorAll('[id^="ob"]').forEach(s=>s.style.display='none');
+  document.getElementById('ob'+n).style.display='block';
+  const steps=document.querySelectorAll('.ob-step');
+  steps.forEach((s,i)=>{s.classList.remove('done','active');if(i<n-1)s.classList.add('done');else if(i===n-1)s.classList.add('active');});
+}
+
+function tc(el){
+  el.classList.toggle('selected');
+  el.querySelector('.check-box').textContent=el.classList.contains('selected')?'✓':'';
+}
+
+function buildStanceStrip(){
+  const strip=document.getElementById('stanceStrip');
+  if(!strip || strip.children.length>0) return;
+  const days=[
+    {n:'mon',d:'9',w:'Prepare',c:'sw-prepare'},
+    {n:'tue',d:'10',w:'Advance',c:'sw-advance'},
+    {n:'wed',d:'11',w:'Advance',c:'sw-advance'},
+    {n:'thu',d:'12',w:'Close',c:'sw-close'},
+    {n:'fri',d:'13',w:'Close',c:'sw-close'},
+    {n:'sat',d:'14',w:'Reset',c:'sw-reset'},
+    {n:'sun',d:'15',w:'Reset',c:'sw-reset'},
+  ];
+  strip.innerHTML=days.map((d,i)=>`<div class="stance-day ${i===1?'today':''}"><div class="stance-day-name">${d.n}</div><div class="stance-day-date">${d.d}</div><div class="stance-word ${d.c}">${d.w}</div></div>`).join('');
+}
+
+function goBriefing(){
+  show('briefing');
+  document.getElementById('bLoad').style.display='block';
+  document.getElementById('bContent').style.display='none';
+  buildStanceStrip();
+  setTimeout(()=>{
+    document.getElementById('bLoad').style.display='none';
+    document.getElementById('bContent').style.display='block';
+  },1800);
+}
+
+function ics(btn,id,title,date,start,end){
+  const s=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Ritmo//EN\r\nBEGIN:VEVENT\r\nDTSTART:${date}T${start}\r\nDTEND:${date}T${end}\r\nSUMMARY:${title}\r\nDESCRIPTION:Suggested by Ritmo — personal timing intelligence.\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([s],{type:'text/calendar'}));
+  a.download=title.replace(/[^a-z0-9]/gi,'_')+'.ics';a.click();
+  btn.textContent='✓ added';btn.classList.add('done');btn.disabled=true;
+}
+function skip(id){document.getElementById(id).style.opacity='0.3';}
+function ol(url){window.open(url,'_blank');}
+
+const DESK_RESPONSES = [
+  "Tuesday before noon carries the strongest signal for this. The configuration favors authority and forward momentum — sign then, not Monday. If Tuesday isn't possible, Thursday morning is the next-best alternative.",
+  "This week's creative window runs Wednesday through Friday morning. Launching inside that window gives the work unusual staying power. Outside it, push to the week of June 22 — the next comparable window.",
+  "Friday's configuration favors resolution conversations, particularly in the evening. Taking this meeting is supported. If it must move, Thursday evening carries a similar — though slightly less amplified — signal."
+];
+let deskI=0;
+function deskAsk(el){
+  document.getElementById('deskInput').value=el.textContent;
+  deskSend();
+}
+function deskSend(){
+  const input=document.getElementById('deskInput');
+  const val=input.value.trim();
+  if(!val)return;
+  const msgs=document.getElementById('deskMessages');
+  const u=document.createElement('div');
+  u.className='desk-msg user';
+  u.textContent=val;
+  msgs.appendChild(u);
+  input.value='';
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    const r=document.createElement('div');
+    r.className='desk-msg ritmo';
+    r.textContent=DESK_RESPONSES[deskI % DESK_RESPONSES.length];
+    deskI++;
+    msgs.appendChild(r);
+    msgs.scrollTop=msgs.scrollHeight;
+  },900);
+}
+document.getElementById('deskInput').addEventListener('keypress',e=>{if(e.key==='Enter')deskSend();});
+</script>
+</body>
+</html>
